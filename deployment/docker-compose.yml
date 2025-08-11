@@ -1,0 +1,54 @@
+version: '3.8'
+services:
+  postgres:
+    image: postgres:15
+    container_name: finance_tracker_db
+    environment:
+      POSTGRES_DB: finance_tracker
+      POSTGRES_USER: finance_user
+      POSTGRES_PASSWORD: your_password_here
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - finance_network
+
+  mysql:
+    image: mysql:8.0
+    container_name: finance_tracker_mysql
+    environment:
+      MYSQL_DATABASE: finance_tracker
+      MYSQL_USER: finance_user
+      MYSQL_PASSWORD: your_password_here
+      MYSQL_ROOT_PASSWORD: root_password
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - finance_network
+
+  app:
+    build: .
+    container_name: finance_tracker_app
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/finance_tracker
+      SPRING_DATASOURCE_USERNAME: finance_user
+      SPRING_DATASOURCE_PASSWORD: your_password_here
+    networks:
+      - finance_network
+
+volumes:
+  postgres_data:
+  mysql_data:
+
+networks:
+  finance_network:
+    driver: bridge
+
+---
